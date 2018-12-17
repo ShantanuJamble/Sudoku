@@ -79,4 +79,11 @@ public class MovementStack {
         }
     }
 	
+    /// <summary>
+    /// Resets stacktop to the default value.
+    /// </summary>
+    public void ResetStack()
+    {
+        stacktop = -1;
+    }
 }

@@ -2,8 +2,10 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
-
+using Unity.Jobs;
+using UnityEngine.Jobs;
+using UnityEngine.SceneManagement;
+//using Sudoku.Jobs;
 
 /// <summary>
 /// This is a listner which will be implemented by the level manager to listen from sudoku board.
@@ -13,7 +15,7 @@ public interface IManager
     void MaintainMoves();
 }
 
-public class LevelManager : MonoBehaviour,IManager {
+public class LevelManager : MonoBehaviour, IManager {
 
     //SudokuBoard related data
     SudokuBoard board = new SudokuBoard();
@@ -28,7 +30,6 @@ public class LevelManager : MonoBehaviour,IManager {
     [SerializeField]
     private GameObject optionsButtonPrefab;
 
-
     ///Level Related data
     GameObject[,] buttonGrid = new GameObject[9, 9];
     private string[] levelStrings = { "Level1", "Level2", "Level3" };
@@ -38,20 +39,68 @@ public class LevelManager : MonoBehaviour,IManager {
     private int currentNumber = 1;
 
     //Movement stack for undo feature.
-    Move last_move;
+    Move lastMove;
     MovementStack moves = new MovementStack();
+
+    //Data related timer
+    [SerializeField]
+    private Text timerText;
+    private static double timeRemaninig;
+    private double[] timeLimit = { 5, 7000, 1000 };
+    
+
+    //Timer Job  related data
+    JobHandle timerHandle;
+    TimerJob timerJob;
+
+    public static double TimeRemaninig
+    {
+        get
+        {
+            return timeRemaninig;
+        }
+
+        set
+        {
+            timeRemaninig = value;
+        }
+    }
+
+  
 
     /// <summary>
     /// Default start method.
     /// </summary>
     private void Start()
     {
+
         GenerateOptionsBoard();
         board.GenerateGameBoard(levelStrings[currentLevel],gameBoard,buttonPrefab,ref buttonGrid);
         MaintainMoves();
+
+        timerJob = new TimerJob
+        {
+            StartTime = 0,
+            MaxTime = timeLimit[currentLevel]
+        };
+        timerHandle = timerJob.Schedule();
+        JobHandle.ScheduleBatchedJobs();
     }
 
-
+    /// <summary>
+    /// Default generic method. Updates the timer text.
+    /// </summary>
+    private void Update()
+    {
+        Debug.Log(timeRemaninig);
+        timerText.text = ((int)timeRemaninig).ToString();
+        if (timeRemaninig >= timeLimit[currentLevel])
+        {
+            timerHandle.Complete();
+            SceneManager.LoadScene("GameOver");
+        }
+        //deltaTime = Time.deltaTime;
+    }
     /// <summary>
     /// Sets up the buttons on very right of window.
     /// </summary>
@@ -96,18 +145,20 @@ public class LevelManager : MonoBehaviour,IManager {
     public void Undo()
     {
         Debug.Log("in Undo");
-        last_move = moves.Pop();
-        if (last_move != null)
+        lastMove = moves.Pop();
+        if (lastMove != null)
         {
-            board.SetCellValue(last_move.Row, last_move.Column, last_move.Value);
-            buttonGrid[last_move.Row, last_move.Column].GetComponentInChildren<Text>().text = last_move.Value + "";
-            buttonGrid[last_move.Row, last_move.Column].GetComponentInChildren<Text>().color = (last_move.Value == 0) ? Color.black :
-                                                                            (last_move.IsValid) ? Color.green : Color.red;
+            board.SetCellValue(lastMove.Row, lastMove.Column, lastMove.Value);
+            buttonGrid[lastMove.Row, lastMove.Column].GetComponentInChildren<Text>().text = lastMove.Value + "";
+            buttonGrid[lastMove.Row, lastMove.Column].GetComponentInChildren<Text>().color = (lastMove.Value == 0) ? Color.black :
+                                                                            (lastMove.IsValid) ? Color.green : Color.red;
 
         }
     }
 
-
+    /// <summary>
+    /// Implementation of interface method,which tracks the moves on sudoku board.
+    /// </summary>
     public void MaintainMoves()
     {
         board.MoveToStack += delegate
@@ -122,5 +173,8 @@ public class LevelManager : MonoBehaviour,IManager {
             }
         };
     }
+
+
+    
 
 }

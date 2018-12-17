@@ -42,7 +42,12 @@ public class SudokuBoard
         }
     }
 
-
+    /// <summary>
+    /// Updates the cell value.
+    /// </summary>
+    /// <param name="value"> New value to be updated</param>
+    /// <param name="row">Index of row.</param>
+    /// <param name="col">Index of column.</param>
     public void SetCellValue(int value,int row,int col)
     {
         try
@@ -144,7 +149,7 @@ public class SudokuBoard
                 return false;
             }
         }
-        //Check for mini square
+        //Check for mini square using spatial hashing
         int sq_start_row = (row_index / 3) * 3;
         int sq_start_col = (col_index / 3) * 3;
         for (int tmp_row_index = sq_start_row; tmp_row_index < sq_start_row + 3; tmp_row_index++)
