@@ -77,7 +77,7 @@ public class LevelManager : MonoBehaviour, IManager {
         GenerateOptionsBoard();
         board.GenerateGameBoard(levelStrings[currentLevel], gameBoard, buttonPrefab, ref buttonGrid);
         MaintainMoves();
-        StartTimerJob();
+        //StartTimerJob();
     }
 
     /// <summary>
@@ -105,22 +105,24 @@ public class LevelManager : MonoBehaviour, IManager {
         {
             SceneManager.LoadScene("GameWon");
         }
-        else
-        {
-            if ((int)timeRemaninig >= timeLimit[currentLevel])
-            {
-                if (board.CellsFilled == 81)
-                {
-                    SceneManager.LoadScene("GameWon");
-                }
-                else
-                {
-                    SceneManager.LoadScene("GameOver");
-                }
-            }
-        }
-        Debug.Log(timeRemaninig);
-        timerText.text = ((int)timeRemaninig).ToString();
+
+
+        //else
+        //{
+        //    if ((int)timeRemaninig >= timeLimit[currentLevel])
+        //    {
+        //        if (board.CellsFilled == 81)
+        //        {
+        //            SceneManager.LoadScene("GameWon");
+        //        }
+        //        else
+        //        {
+        //            SceneManager.LoadScene("GameOver");
+        //        }
+        //    }
+        //}
+        //Debug.Log(timeRemaninig);
+        //timerText.text = ((int)timeRemaninig).ToString();
         
         //deltaTime = Time.deltaTime;
     }
@@ -214,8 +216,6 @@ public class LevelManager : MonoBehaviour, IManager {
             currentLevel += direction;
             board.GenerateGameBoard(levelStrings[currentLevel], gameBoard, buttonPrefab, ref buttonGrid);
             moves.ResetStack();
-            timerJob.StartTime = 0;
-            timerJob.MaxTime = timeLimit[currentLevel];
         }
     }
     

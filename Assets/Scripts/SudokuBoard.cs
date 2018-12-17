@@ -13,7 +13,7 @@ public delegate void PushMovesToStack();
 public class SudokuBoard
 {
     private int[,] sudokuGrid = new int[9, 9];
-    private int currentNumber;
+    private int currentNumber=1;
     private Move lastMove = new Move();
     //Listeners for the buttons on grid
     public PushMovesToStack MoveToStack;
