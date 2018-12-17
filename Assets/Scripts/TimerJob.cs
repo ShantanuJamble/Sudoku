@@ -8,18 +8,42 @@ using System;
 
 public struct TimerJob : IJob
 {
-    public double StartTime;
-    public double MaxTime;
+    public double startTime;
+    public double maxTime;
 
-        
-    public void Execute()
-    {   
-        while (StartTime >= 0f)
+    public double StartTime
+    {
+        get
         {
-            LevelManager.TimeRemaninig = StartTime;
-            
-            StartTime+=0.000001*0.02;
+            return startTime;
+        }
+
+        set
+        {
+            startTime = value;
         }
     }
-  
+
+    public double MaxTime
+    {
+        get
+        {
+            return maxTime;
+        }
+
+        set
+        {
+            maxTime = value;
+        }
+    }
+
+    public void Execute()
+    {   
+        while (StartTime <= MaxTime)
+        {
+            StartTime += 0.000001 * 0.08;
+            LevelManager.TimeRemaninig = StartTime;
+        }
+    }
+    
 }

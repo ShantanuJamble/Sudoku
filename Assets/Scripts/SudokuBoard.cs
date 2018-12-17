@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
-
+//Deleget for moving move status to stack.
 public delegate void PushMovesToStack();
 
 
@@ -17,7 +17,7 @@ public class SudokuBoard
     private Move lastMove = new Move();
     //Listeners for the buttons on grid
     public PushMovesToStack MoveToStack;
-
+    private int cellsFilled = 0;
 
 
     /// <summary>
@@ -39,6 +39,21 @@ public class SudokuBoard
         get
         {
             return lastMove;
+        }
+    }
+
+    /// <summary>
+    /// Getter and Setter for the Cellsfilled count.
+    /// </summary>
+    public int CellsFilled
+    {
+        get
+        {
+            return cellsFilled;
+        }
+        set
+        {
+            cellsFilled += value;
         }
     }
 
@@ -95,6 +110,7 @@ public class SudokuBoard
                     tmp_button.interactable = false;
                 text.text = tmp_input_array[col_index] + "";
                 sudokuGrid[row_index, col_index] = int.Parse(tmp_input_array[col_index] + "");
+                CellsFilled += (sudokuGrid[row_index, col_index] != 0) ? 1 : 0;
             }
         }
     }
@@ -121,6 +137,7 @@ public class SudokuBoard
         {
             gameObject.GetComponentInChildren<Text>().color = Color.green;
             lastMove.IsValid = true;
+            CellsFilled++;
         }
         else
         {
@@ -129,7 +146,7 @@ public class SudokuBoard
         }
         MoveToStack();
         sudokuGrid[row_index, col_index] = currentNumber;
-
+        
     }
 
 

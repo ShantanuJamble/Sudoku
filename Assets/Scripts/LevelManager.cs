@@ -46,7 +46,7 @@ public class LevelManager : MonoBehaviour, IManager {
     [SerializeField]
     private Text timerText;
     private static double timeRemaninig;
-    private double[] timeLimit = { 5, 7000, 1000 };
+    private int [] timeLimit = { 5000, 7000, 1000 };
     
 
     //Timer Job  related data
@@ -75,14 +75,23 @@ public class LevelManager : MonoBehaviour, IManager {
     {
 
         GenerateOptionsBoard();
-        board.GenerateGameBoard(levelStrings[currentLevel],gameBoard,buttonPrefab,ref buttonGrid);
+        board.GenerateGameBoard(levelStrings[currentLevel], gameBoard, buttonPrefab, ref buttonGrid);
         MaintainMoves();
+        StartTimerJob();
+    }
 
+    /// <summary>
+    /// Starts the timer job.
+    /// </summary>
+    private void StartTimerJob()
+    {
+        
         timerJob = new TimerJob
         {
             StartTime = 0,
             MaxTime = timeLimit[currentLevel]
         };
+        
         timerHandle = timerJob.Schedule();
         JobHandle.ScheduleBatchedJobs();
     }
@@ -92,13 +101,27 @@ public class LevelManager : MonoBehaviour, IManager {
     /// </summary>
     private void Update()
     {
+        if (board.CellsFilled == 81)
+        {
+            SceneManager.LoadScene("GameWon");
+        }
+        else
+        {
+            if ((int)timeRemaninig >= timeLimit[currentLevel])
+            {
+                if (board.CellsFilled == 81)
+                {
+                    SceneManager.LoadScene("GameWon");
+                }
+                else
+                {
+                    SceneManager.LoadScene("GameOver");
+                }
+            }
+        }
         Debug.Log(timeRemaninig);
         timerText.text = ((int)timeRemaninig).ToString();
-        if (timeRemaninig >= timeLimit[currentLevel])
-        {
-            timerHandle.Complete();
-            SceneManager.LoadScene("GameOver");
-        }
+        
         //deltaTime = Time.deltaTime;
     }
     /// <summary>
@@ -152,6 +175,8 @@ public class LevelManager : MonoBehaviour, IManager {
             buttonGrid[lastMove.Row, lastMove.Column].GetComponentInChildren<Text>().text = lastMove.Value + "";
             buttonGrid[lastMove.Row, lastMove.Column].GetComponentInChildren<Text>().color = (lastMove.Value == 0) ? Color.black :
                                                                             (lastMove.IsValid) ? Color.green : Color.red;
+            if (lastMove.IsValid)
+                board.CellsFilled = -1;
 
         }
     }
@@ -174,7 +199,25 @@ public class LevelManager : MonoBehaviour, IManager {
         };
     }
 
-
+    /// <summary>
+    /// Loads a level
+    /// </summary>
+    /// <param name="direction"> Defines if we want to load next or previous level.(Next = 1,Prev = -1)</param>
+    public void MoveToNext(int direction)
+    {
+        if(currentLevel+direction <0 || currentLevel + direction >=levelStrings.Length)
+        {
+            return;
+        }
+        else
+        {
+            currentLevel += direction;
+            board.GenerateGameBoard(levelStrings[currentLevel], gameBoard, buttonPrefab, ref buttonGrid);
+            moves.ResetStack();
+            timerJob.StartTime = 0;
+            timerJob.MaxTime = timeLimit[currentLevel];
+        }
+    }
     
 
 }
